@@ -124,6 +124,16 @@ describe('FilesAndUploads utils', () => {
       expect(date.toISOString()).toBe('2023-10-01T12:00:00.000Z');
     });
 
+    it('returns a Date object unchanged instead of re-parsing its text form', () => {
+      // The "New update" form starts with a Date. Re-parsing String(date) truncated to
+      // 19 characters is not valid in Safari (Invalid Date), so it must not be attempted.
+      const input = new Date('2023-10-01T12:00:00Z');
+      const date = convertToDateFromString(input);
+      expect(date).toBe(input);
+      // @ts-ignore
+      expect(Number.isNaN(date.getTime())).toBe(false);
+    });
+
     it('returns an empty string for invalid date strings', () => {
       const dateStr = '';
       const date = convertToDateFromString(dateStr);
