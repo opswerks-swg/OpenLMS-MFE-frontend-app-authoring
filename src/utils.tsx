@@ -271,16 +271,24 @@ export function setupYupExtensions() {
   });
 }
 
-export const convertToDateFromString = (dateStr: string): Date | undefined => {
+export const convertToDateFromString = (dateStr: string | Date): Date | undefined => {
   /**
    * Convert UTC to local time for react-datepicker
    * Note: react-datepicker v4 had a bug where it only interacts with local time
    * but this bug may no longer be affecting v8+ ?
-   * @param {string} dateStr - YYYY-MM-DDTHH:MM:SSZ
+   * @param {string|Date} dateStr - YYYY-MM-DDTHH:MM:SSZ, or a Date that is already usable as is
    * @return date in local time
    */
   if (!dateStr) {
     return undefined;
+  }
+
+  // A Date must not go through String(): its text form ("Mon Nov 09 2026 14:00:00 GMT+...")
+  // is cut to 19 characters below and is then parsed by the browser's own Date parser.
+  // Chrome accepts the truncated text, Safari returns an invalid date, and react-datepicker
+  // throws "Invalid time value".
+  if (dateStr instanceof Date) {
+    return dateStr;
   }
 
   const stripTimeZone = (stringValue: string) => stringValue.substring(0, 19);
